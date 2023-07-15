@@ -24,6 +24,112 @@
 #    See the documentation for each action used below for the recommended IAM policies for this IAM user,
 #    and best practices on handling the access key credentials.
 
+
+
+
+
+
+
+
+
+
+
+
+var express = require('express');
+
+var AWS = require('aws-sdk');
+
+var EC2 = require('aws-ec2')('access key', 'secret');
+
+var scale = require('aws-scale');
+
+var router = express.Router();
+
+//Authenticate AWS:
+
+var myCredentials = new AWS.CognitoIdentityCredentials({
+
+  IdentityPoolId:'us-west-2:b0efe3c7-e4c9-420f-836b-6d776e2a9271'
+
+}); 
+
+var myConfig = new AWS.Config({
+
+  credentials: myCredentials, region: 'us-west-2'
+
+});
+
+AWS.config = myConfig
+
+var minInst = 1;
+
+var maxInst = 3;
+
+var ec2 = new AWS.EC2();
+
+//Set up parameters for EC2 Instances:
+
+var params = {
+
+  ImageId: 'ami-6e1a0117',
+
+  MaxCount: minInst,
+
+  MinCount: maxInst, 
+
+  InstanceInitiatedShutdownBehavior: 'terminate',
+
+  InstanceType: 't2.micro',
+
+  Monitoring: {
+
+    Enabled: true 
+
+  },
+
+  NetworkInterfaces: [{
+
+    AssociatePublicIpAddress: true,
+
+    DeleteOnTermination: true,
+
+  }],
+
+  Placement: {
+
+    AvailabilityZone: 'us-west-2',
+
+  },
+
+  SecurityGroupIds: [
+
+    'sg-b0307ccd',
+
+  ],
+
+  SecurityGroups: [
+
+    'CAB432Assignment2SG',
+
+  ],
+
+};
+
+ec2.runInstances(params, function(err, data) {
+
+  if (err){
+
+    console.log(err, err.stack); //An error occurred
+
+  }
+
+  else{
+
+    console.log(data); //Successful Response
+
+  }
+
+});
 name: Deploy to Amazon ECS
 
 on:
